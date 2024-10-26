@@ -58,3 +58,19 @@
     align-items: center;
     gap: 20px;
 }
+
+@media screen and (max-width: 1170px){
+    #catalago{
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .item{
+        width: calc(50% - 18px);
+    }
+
+    .section-subtitle{
+        text-align: center;
+    }
+}
+
