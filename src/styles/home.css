@@ -72,4 +72,21 @@
       
 }
 
+@media screen and (max-width: 1070px){
+
+    #home{
+        min-height: 100%;
+        padding-top: 0px;
+    
+    }
+    #img_container{
+        display: none;
+    }
+
+    #cta{
+        align-items: center;
+        text-align: center;
+        width: 100%;
+    }
+}
 
