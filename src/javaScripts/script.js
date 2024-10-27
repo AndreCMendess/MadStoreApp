@@ -37,4 +37,26 @@ $(document).ready(function(){
 
     });
 
+
+    ScrollReveal().reveal('#cta',{
+        origin:'left',
+        duration: 2000,
+        distance:'20%'
+
+    });
+
+    ScrollReveal().reveal('#catalago',{
+        origin:'left',
+        duration: 2000,
+        distance:'20%'
+
+    });
+
+    ScrollReveal().reveal('#sobre_nos',{
+        origin:'right',
+        duration: 2000,
+        distance:'20%'
+
+    });
+
 });
