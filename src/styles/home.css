@@ -90,3 +90,26 @@
     }
 }
 
+
+#login{
+    display: none;   
+   
+}
+
+.d-container{
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.5);
+    color:  #401E01;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}
+
+
+#login .btn{
+    background-color:  #401E01;
+    border: none;
+}
+
