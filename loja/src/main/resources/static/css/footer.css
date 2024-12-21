@@ -1,0 +1,29 @@
+footer{
+    background-color:  #D9B97E;
+}
+
+#footer_items{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px 8% 24px 8%;
+}
+
+#wave{
+   transform: translateY(-1px); 
+   
+}
+
+#copyright{
+    color: #401E01;
+    font-size: 500;
+}
+
+@media screen and (max-width:600px){
+
+    #footer_items{
+        flex-direction: column;
+        gap:1rem;
+    }
+    
+}
