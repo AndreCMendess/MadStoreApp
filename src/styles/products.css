@@ -59,6 +59,16 @@
     gap: 20px;
 }
 
+.btn-edit{
+    display: none;
+    cursor:pointer;
+    border: "1px solid #ccc";
+}
+
+#edit_container{
+    display:none;
+}
+
 @media screen and (max-width: 1170px){
     #catalago{
         flex-wrap: wrap;

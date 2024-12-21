@@ -1,13 +1,48 @@
 $(document).ready(function(){
     
+    // Alterna o menu móvel e o ícone de botão
     $('#mobile_btn').on('click',function(){
         $('#mobile_menu').toggleClass('active');
         $('#mobile_btn').find('i').toggleClass('fa-x');
     });
 
+    // Metodo para obter os produtos armazenados no json
+    $.get("http://localhost:3000/produtos",function(data , status){
+        for (i = 0; i < data.length; i++) {
+            $('#catalago').append(`
+               <div class="item" data-id="${data[i].id}">
+                <div>
+                    <i class="btn-edit bi bi-pen-fill"></i>
+                </div>
+                <div class="item-heart">
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+                <img src="${data[i].image || './src/assets/default.png'}" alt="imagem do produto">
+
+                <h3 class="item-title">${data[i]["item-title"]}</h3>
+
+                <span class="item-description">${data[i]["item-description"]}</span>
+
+                <div class="item-price">
+                    <h4>R$${data[i]["item-price"]}</h4>
+                    <button class="btn-default">
+                        <i class="fa-solid fa-basket-shopping"></i>
+                    </button>
+                </div>
+            </div>
+            `);
+        }
+    });
+
+
+
+
+
+
     const sections = $('section');
     const navItems = $('.nav-item');
 
+    // Evento de rolagem da janela
     $(window).on('scroll',function () {
 
         const header = $('header');
@@ -109,10 +144,92 @@ $(document).ready(function(){
         let email = $("[name='email']").val();
         let password = $("[name='senha']").val();
         
+        $('#login').css("display","none");
 
+        //Se o login for valido
         if($('#login_form').valid()){
-            console.log(email);
-            console.log(password);
+            //O botao de edit sera visivel
+            $('.btn-edit').css("display","flex");
+            //Quando clicar no botao de edit de um produto
+            $(document).on('click','.btn-edit',function(event){
+
+                // O cloest seleciona o elemento pai do botao selecionado que nese caso o produto
+                let item = $(this).closest('.item');
+
+                // Coloca o valor do item-title na variavel titulo
+                let titulo = item.find('.item-title').text();
+                // Coloca o valor do item-description na variavel desc
+                let desc = item.find('.item-description').text();
+                 // Coloca o valor do item-preice na variavel preco
+                let preco = item.find('.item-price h4').text();
+
+                // Coloca o valor do data-id ,que nesse caso o id do produto em uma variavel
+                let itemId = item.data('id');
+
+
+                // Uma tela sera visivel ao clicar no edit , que salva o id do produto em uma variavel itemId que sera usada posteriomente para atualizar o produto no json
+                $('#edit_container').data('item-id',itemId).css("display","flex");
+
+                // O valor do input de titulo do container de edit recebe o valor do titulo do item
+                $('#update_title').val(titulo);
+                // O valor do input do preço do container de edit recebe o valor do preço do item
+                $('#update_price').val(preco.replace('R$','').trim());
+                // O valor do input de descriçao do container de edit recebe o valor de descriçao do item
+                $('#update_desc').val(desc);
+                
+
+                // Ao clicar no botão de update
+                $('#btn_update').on('click',function(event){
+                    // Desabilita o evento de padrao ao clicar no botao
+                    event.preventDefault(); 
+                
+                    // Aidciona em uma variavel title o valor do input update_title
+                    var title = $('#update_title').val();
+                      // Aidciona em uma variavel desc o valor do input update_descriction
+                    var desc = $('#update_desc').val();
+                      // Aidciona em uma variavel price o valor do input update_price
+                    var price = $('#update_price').val();
+
+                    // Cria um objeto produto , que recebe os valores do titule , desc e price do formulario
+                    const produtoUpdate ={
+                        title: title,
+                        description: desc,
+                        price:price
+                    }
+
+                   
+                    // Aqui uma requiiçao é feita 
+                    $.ajax({
+                        //Recebe como url o localhost , endpoint de produtos e o id do produto armazenado na variavel guardada acima
+                        url:`http://localhost:3000/produtos/${itemId}`,
+                        //Define o tipo da requisiçao como put (atualizaçao)
+                        type:'PUT',
+                        // Define os dados da requiçao como do tipo JSON
+                        data: JSON.stringify(produtoUpdate),
+                        // Define o tipo de conteudo como json
+                        contentType: 'application/json',
+                        // Se for sucesso
+                        success:function(response){
+
+                            // Guarda o produto em uma variavel pelo id 
+                            var itemUpdate = $('.item[data-id="' + itemId + '"]');
+                            // Altera os dados do html do produto com os novos dados
+                            itemUpdate.find('.item-title').html(title);
+                            itemUpdate.find('.item-description').html(desc);
+                            itemUpdate.find('.item-price h4').html('R$ ' + price);
+                            // Fecha o container de edit
+                            $('#edit_container').css("display","none");
+                            console.log("Produto atualizado com sucesso:", response);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Erro ao atualizar o produto:", error);
+                           
+                        }
+                    });
+                    
+                 
+                });
+            });
         }
     });
 

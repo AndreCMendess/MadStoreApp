@@ -1,0 +1,40 @@
+{
+  "produtos": [
+    {
+      "title": "1231",
+      "description": "asda",
+      "price": "22,00",
+      "id": "1"
+    },
+    {
+      "id": "2",
+      "item-title": "Vestido",
+      "item-description": "verde claro",
+      "item-price": "200,00"
+    },
+    {
+      "id": "3",
+      "item-title": "calça",
+      "item-description": "jeans",
+      "item-price": "100,00"
+    },
+    {
+      "id": "4",
+      "item-title": "Vestido",
+      "item-description": "amarelo",
+      "item-price": "120,00"
+    },
+    {
+      "id": "5",
+      "item-title": "bolsas",
+      "item-description": "cinza",
+      "item-price": "40,00"
+    },
+    {
+      "id": "6",
+      "item-title": "moleton",
+      "item-description": "beige",
+      "item-price": "150,00"
+    }
+  ]
+}
