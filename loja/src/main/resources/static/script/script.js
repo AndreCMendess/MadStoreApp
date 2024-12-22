@@ -7,7 +7,7 @@ $(document).ready(function(){
     });
 
     // Metodo para obter os produtos armazenados no json
-    $.get("http://localhost:3000/produtos",function(data , status){
+    $.get("http://localhost:8080/madstore/produtos",function(data , status){
         for (i = 0; i < data.length; i++) {
             $('#catalago').append(`
                <div class="item" data-id="${data[i].id}">
@@ -17,14 +17,14 @@ $(document).ready(function(){
                 <div class="item-heart">
                     <i class="fa-solid fa-heart"></i>
                 </div>
-                <img src="${data[i].image || './src/assets/default.png'}" alt="imagem do produto">
+                <img src="${data[i].image || './assets/default.png'}" alt="imagem do produto">
 
-                <h3 class="item-title">${data[i]["item-title"]}</h3>
+                <h3 class="item-title">${data[i].nome}</h3>
 
-                <span class="item-description">${data[i]["item-description"]}</span>
+                <span class="item-description">${data[i].descricao}</span>
 
                 <div class="item-price">
-                    <h4>R$${data[i]["item-price"]}</h4>
+                    <h4>R$${data[i].valor.toFixed(2)}</h4>
                     <button class="btn-default">
                         <i class="fa-solid fa-basket-shopping"></i>
                     </button>
