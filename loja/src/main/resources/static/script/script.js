@@ -94,9 +94,16 @@ $(document).ready(function(){
 
              if ($('#form_produto').valid()) {
                 if(modalTipo==='atualizar'){
-                     alert('Formulário válido. Produto será atualizado!');
+                    $('#message-box').text('Produto atualizado com sucesso!').fadeIn().delay(3000).fadeOut();
+                       setTimeout(function() {
+                           $('#produto_modal').modal('hide');
+                    }, 2000);
+
                 }else{
-                      alert('Formulário válido. Produto será cadastrado!');
+                    $('#message-box').text('Produto cadastrado com sucesso!').fadeIn().delay(3000).fadeOut();
+                       setTimeout(function() {
+                           $('#produto_modal').modal('hide');
+                    }, 2000);
                 }
              } else {
                     alert('Formulário inválido. Corrija os erros antes de salvar.');
