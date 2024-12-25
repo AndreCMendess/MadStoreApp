@@ -7,58 +7,58 @@ $(document).ready(function(){
     });
 
     // Metodo para obter os produtos armazenados no banco de dados
-    $.get("http://localhost:8080/madstore/produtos",function(data , status){
-
-        if(status === "success"){
+    $.ajax({
+        url: "http://localhost:8080/madstore/produtos",
+        method: "GET",
+        success(data) {
             $('#catalago').empty();
 
-        for (i = 0; i < data.length; i++) {
-            $('#catalago').append(`
-               <div class="item" data-id="${data[i].id}">
-                <div class="btn-container">
-                  <i class="btn-edit fas fa-edit"></i>
-                  <i class="btn-delete fas fa-trash-alt"></i>
-                </div>
-                <div class="item-heart">
-                    <i class="fa-solid fa-heart"></i>
-                </div>
-                <img src="${data[i].image || './assets/default.png'}" alt="imagem do produto">
+            data.forEach(function(produto) {
+                $('#catalago').append(`
+                    <div class="item" data-id="${produto.id}">
+                       <div class="btn-container">
+                           <i class="btn-edit fas fa-edit"></i>
+                           <i class="btn-delete fas fa-trash-alt"></i>
+                       </div>
+                       <div class="item-heart">
+                           <i class="fa-solid fa-heart"></i>
+                       </div>
+                       <img src="${produto.image || './assets/default.png'}" alt="imagem do produto">
 
-                <h3 class="item-title">${data[i].nome}</h3>
+                       <h3 class="item-title">${produto.nome}</h3>
 
-                <span class="item-description">${data[i].descricao}</span>
+                       <span class="item-description">${produto.descricao}</span>
 
-                <div class="item-price">
-                    <h4>R$${data[i].valor.toFixed(2)}</h4>
-                    <button class="btn-default">
-                        <i class="fa-solid fa-basket-shopping"></i>
-                    </button>
-                </div>
-            </div>
-            `);
+                       <div class="item-price">
+                            <h4>R$${produto.valor.toFixed(2)}</h4>
+                            <button class="btn-default">
+                                   <i class="fa-solid fa-basket-shopping"></i>
+                            </button>
+                       </div>
+                    </div>
+                `);
+            });
+        },error: function(xhr, status, error){
+            console.error("Erro ao carregar os produtos:", status, error);
+
+           $('#catalago').html("<p>Ocorreu um erro ao carregar os produtos. Tente novamente mais tarde.</p>");
         }
+    });
 
-          $('.btn-edit, .btn-create, .btn-delete').css("display","none");
+    $('.btn-edit, .btn-create, .btn-delete').css("display","none");
 
 
-         $(".btn-edit").on('click',function(event){
+    $(".btn-edit").on('click',function(event){
 
             const produtoId =  $(this).closest('.item').data("id");
             console.log("Produto id para editar", produtoId);
             abrirModalAtualizar(produtoId);
-         });
+    });
 
          $(".btn-create").on('click',function(){
               abrirModalCadastrar();
 
          });
-
-        }else{
-         console.error("Erro ao carregar produtos");
-        }
-    }).fail(function(){
-        console.error("erro ao fazer requisicao get");
-    });
 
      const myModal = new bootstrap.Modal(document.getElementById('produto_modal'));
      let modalTipo= "";
@@ -100,6 +100,10 @@ $(document).ready(function(){
                     }, 2000);
 
                 }else{
+
+                    $.ajax({
+
+                    })
                     $('#message-box').text('Produto cadastrado com sucesso!').fadeIn().delay(3000).fadeOut();
                        setTimeout(function() {
                            $('#produto_modal').modal('hide');
