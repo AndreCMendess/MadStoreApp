@@ -1,18 +1,23 @@
 $(document).ready(function(){
-    
+
     // Alterna o menu móvel e o ícone de botão
     $('#mobile_btn').on('click',function(){
         $('#mobile_menu').toggleClass('active');
         $('#mobile_btn').find('i').toggleClass('fa-x');
     });
 
-    // Metodo para obter os produtos armazenados no json
+    // Metodo para obter os produtos armazenados no banco de dados
     $.get("http://localhost:8080/madstore/produtos",function(data , status){
+
+        if(status === "success"){
+            $('#catalago').empty();
+
         for (i = 0; i < data.length; i++) {
             $('#catalago').append(`
                <div class="item" data-id="${data[i].id}">
-                <div>
-                    <i class="btn-edit bi bi-pen-fill"></i>
+                <div class="btn-container">
+                  <i class="btn-edit fas fa-edit"></i>
+                  <i class="btn-delete fas fa-trash-alt"></i>
                 </div>
                 <div class="item-heart">
                     <i class="fa-solid fa-heart"></i>
@@ -32,7 +37,65 @@ $(document).ready(function(){
             </div>
             `);
         }
+
+          $('.btn-edit, .btn-create, .btn-delete').css("display","none");
+
+
+         $(".btn-edit").on('click',function(event){
+
+            const produtoId =  $(this).closest('.item').data("id");
+            console.log("Produto id para editar", produtoId);
+            abrirModal(produtoId);
+         });
+
+         $(".btn-criar").on('click',function(){
+            myModal.show();
+             if ($('#form_produto').valid()) {
+                                alert('Formulário válido. Produto será atualizado!');
+                                // Aqui você pode fazer o AJAX para salvar o produto
+                         } else {
+                                alert('Formulário inválido. Corrija os erros antes de salvar.');
+                         }
+         });
+
+        }else{
+         console.error("Erro ao carregar produtos");
+        }
+    }).fail(function(){
+        console.error("erro ao fazer requisicao get");
     });
+
+     const myModal = new bootstrap.Modal(document.getElementById('produto_modal'));
+
+     function abrirModal(produtoId){
+
+            $.get(`http://localhost:8080/madstore/produtos/${produtoId}`,function(data , status) {
+                if(status === "success"){
+                    $('#nome_produto').val(data.nome);
+                    $('#desc_produto').val(data.descricao);
+                    $('#valor_produto').val(data.valor);
+
+                    myModal.show();
+                    console.log(data);
+                }else{
+                    console.error("Erro ao buscar dados do produto.");
+                }
+            }).fail(function (){
+                console.error("Erro ao buscar dados do produto.")
+            });
+        }
+
+        $('#btn_update').on('click',function(e){
+            e.preventDefault();
+
+             if ($('#form_produto').valid()) {
+                    alert('Formulário válido. Produto será atualizado!');
+                    // Aqui você pode fazer o AJAX para salvar o produto
+             } else {
+                    alert('Formulário inválido. Corrija os erros antes de salvar.');
+             }
+
+        })
 
 
 
@@ -132,105 +195,72 @@ $(document).ready(function(){
             },
             senha:{
                 required:"Por favor ensira sua senha",
-                minlength:"A senha deve conter pelomenos 6 caracteres"
+                minlength:"A senha deve conter pelo menos 6 caracteres"
             }
         },errorPlacement: function(error,element){
             error.appendTo(element.parent().find(".error"));
         }
     });
 
+    $.validator.addMethod("valorMonetario", function(value, element) {
+        return this.optional(element) || /^(\d+(\.\d{1,2})?)$/.test(value);  // Aceita valores com até duas casas decimais
+    }, "Por favor, insira um valor monetário válido");
+
+    $('#form_produto').validate({
+        rules:{
+            nome:{
+                required:true
+            },
+            desc:{
+                required:true
+            },
+            valor:{
+                required:true,
+                number:true,
+                min: 0.01,
+                valorMonetario:true
+
+
+            }
+        },
+        messages:{
+            nome:{
+                 required:"O nome do produto é obrigatorio"
+            },
+            desc:{
+                required: "A descrição do produto é obrigatoria"
+            },
+            valor:{
+                required: "O valor do produto é obrigatorio",
+                number: "Precisa ser um numero valido",
+                min:"O valor precisa ser maior que 0",
+                valorMonetario: "Por favor , Insira um valor válido exemplo: 20,00"
+            }
+
+        },
+        errorPlacement: function(error,element){
+            error.appendTo(element.parent().find(".error"))
+        }
+    });
+
     //validar login
     $('#btn_login').on('click',function(event){
-        let email = $("[name='email']").val();
-        let password = $("[name='senha']").val();
-        
-        $('#login').css("display","none");
+        event.preventDefault();
 
         //Se o login for valido
         if($('#login_form').valid()){
-            //O botao de edit sera visivel
+
+            $('#login').css("display", "none");
+            alert("login realizado com sucesso!");
+            //O botoes serao visiveis
             $('.btn-edit').css("display","flex");
-            //Quando clicar no botao de edit de um produto
-            $(document).on('click','.btn-edit',function(event){
+            $('.btn-create').css("display","flex");
+            $('.btn-delete').css("display","flex");
 
-                // O cloest seleciona o elemento pai do botao selecionado que nese caso o produto
-                let item = $(this).closest('.item');
-
-                // Coloca o valor do item-title na variavel titulo
-                let titulo = item.find('.item-title').text();
-                // Coloca o valor do item-description na variavel desc
-                let desc = item.find('.item-description').text();
-                 // Coloca o valor do item-preice na variavel preco
-                let preco = item.find('.item-price h4').text();
-
-                // Coloca o valor do data-id ,que nesse caso o id do produto em uma variavel
-                let itemId = item.data('id');
-
-
-                // Uma tela sera visivel ao clicar no edit , que salva o id do produto em uma variavel itemId que sera usada posteriomente para atualizar o produto no json
-                $('#edit_container').data('item-id',itemId).css("display","flex");
-
-                // O valor do input de titulo do container de edit recebe o valor do titulo do item
-                $('#update_title').val(titulo);
-                // O valor do input do preço do container de edit recebe o valor do preço do item
-                $('#update_price').val(preco.replace('R$','').trim());
-                // O valor do input de descriçao do container de edit recebe o valor de descriçao do item
-                $('#update_desc').val(desc);
-                
-
-                // Ao clicar no botão de update
-                $('#btn_update').on('click',function(event){
-                    // Desabilita o evento de padrao ao clicar no botao
-                    event.preventDefault(); 
-                
-                    // Aidciona em uma variavel title o valor do input update_title
-                    var title = $('#update_title').val();
-                      // Aidciona em uma variavel desc o valor do input update_descriction
-                    var desc = $('#update_desc').val();
-                      // Aidciona em uma variavel price o valor do input update_price
-                    var price = $('#update_price').val();
-
-                    // Cria um objeto produto , que recebe os valores do titule , desc e price do formulario
-                    const produtoUpdate ={
-                        title: title,
-                        description: desc,
-                        price:price
-                    }
-
-                   
-                    // Aqui uma requiiçao é feita 
-                    $.ajax({
-                        //Recebe como url o localhost , endpoint de produtos e o id do produto armazenado na variavel guardada acima
-                        url:`http://localhost:3000/produtos/${itemId}`,
-                        //Define o tipo da requisiçao como put (atualizaçao)
-                        type:'PUT',
-                        // Define os dados da requiçao como do tipo JSON
-                        data: JSON.stringify(produtoUpdate),
-                        // Define o tipo de conteudo como json
-                        contentType: 'application/json',
-                        // Se for sucesso
-                        success:function(response){
-
-                            // Guarda o produto em uma variavel pelo id 
-                            var itemUpdate = $('.item[data-id="' + itemId + '"]');
-                            // Altera os dados do html do produto com os novos dados
-                            itemUpdate.find('.item-title').html(title);
-                            itemUpdate.find('.item-description').html(desc);
-                            itemUpdate.find('.item-price h4').html('R$ ' + price);
-                            // Fecha o container de edit
-                            $('#edit_container').css("display","none");
-                            console.log("Produto atualizado com sucesso:", response);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Erro ao atualizar o produto:", error);
-                           
-                        }
-                    });
-                    
-                 
-                });
-            });
+        }else{
+         alert("Por favor, digite o email e senha corretas.");
         }
+
     });
 
 
