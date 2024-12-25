@@ -1,5 +1,8 @@
 $(document).ready(function(){
-    carregarCatalogo();
+
+    const myModal = new bootstrap.Modal(document.getElementById('produto_modal'));
+    let modalTipo= "";
+
 
     // Alterna o menu móvel e o ícone de botão
     $('#mobile_btn').on('click',function(){
@@ -52,55 +55,95 @@ $(document).ready(function(){
     }
 
 
-
-
-    $(".btn-edit").on('click',function(event){
-       const produtoId =  $(this).closest('.item').data("id");
-       console.log("Produto id para editar", produtoId);
-       abrirModalAtualizar(produtoId);
-    });
-
-    $(".btn-create").on('click',function(){
-       abrirModalCadastrar();
-    });
-
-    const myModal = new bootstrap.Modal(document.getElementById('produto_modal'));
-    let modalTipo= "";
-
-    function abrirModalCadastrar(){
-        modalTipo= "cadastrar"
-        $('#produtoModalLabel').text("Cadastrar novo Produto");
-        myModal.show();
-    }
+     function abrirModalCadastrar(){
+            modalTipo = "cadastrar"
+            $('#produtoModalLabel').text("Cadastrar novo Produto");
+            myModal.show();
+     }
 
      function abrirModalAtualizar(produtoId){
-            modalTipo= "atualizar"
-            $('#produtoModalLabel').text("Atualizar Produto");
-            $.get(`http://localhost:8080/madstore/produtos/${produtoId}`,function(data , status) {
-                if(status === "success"){
-                    $('#nome_produto').val(data.nome);
-                    $('#desc_produto').val(data.descricao);
-                    $('#valor_produto').val(data.valor);
+                modalTipo = "atualizar"
+                console.log("Abrindo modal de atualização com produto ID:", produtoId); // Verifique se o ID está correto
+                $('#produtoModalLabel').text("Atualizar Produto");
+                $.get(`http://localhost:8080/madstore/produtos/${produtoId}`,function(data , status) {
+                    if(status === "success"){
+                        $('#nome_produto').val(data.nome);
+                        $('#desc_produto').val(data.descricao);
+                        $('#valor_produto').val(data.valor);
+                        $('#produto_id').val(produtoId);
+                        myModal.show();
+                        console.log(data);
+                    }else{
+                        console.error("Erro ao buscar dados do produto.");
+                    }
+                }).fail(function (){
+                    console.error("Erro ao buscar dados do produto.")
+                });
+         }
 
-                    myModal.show();
-                    console.log(data);
-                }else{
-                    console.error("Erro ao buscar dados do produto.");
-                }
-            }).fail(function (){
-                console.error("Erro ao buscar dados do produto.")
-            });
-     }
+    $(document).on('click', '.btn-edit', function(event) {
+        const produtoId = $(this).closest('.item').data("id");
+        console.log("Produto id para editar", produtoId);
+        abrirModalAtualizar(produtoId);
+    });
+
+    $('.btn-create').on('click',function(){
+       abrirModalCadastrar();
+
+    });
+
+    let produtoIdDelete = null;
+
+    $(document).on('click', '.btn-delete', function(event) {
+         produtoIdDelete =  $(this).closest('.item').data("id");
+         console.log("Produto id para deletar:", produtoIdDelete);
+         $('#confirm_delete_modal').modal('show');
+    });
+
+    $('#btn_confirm_delete').on('click', function(){
+        $.ajax({
+            url:`http://localhost:8080/madstore/produtos/${produtoIdDelete}`,
+            method: 'DELETE',
+            success: function(response) {
+                carregarCatalogo();
+                $('#message-delete').text('Produto deletado com sucesso!').fadeIn().delay(3000).fadeOut();
+                      setTimeout(function() {
+                      $('#confirm_delete_modal').modal('hide');
+                }, 2000);
+            },
+            error: function() {
+            }
+        });
+    });
 
         $('#btn_update').on('click',function(e){
             e.preventDefault();
 
              if ($('#form_produto').valid()) {
+
+                let produtoId = $('#produto_id').val();
+
                 if(modalTipo === 'atualizar'){
-                    $('#message-box').text('Produto atualizado com sucesso!').fadeIn().delay(3000).fadeOut();
-                       setTimeout(function() {
-                           $('#produto_modal').modal('hide');
-                    }, 2000);
+
+                    let produto = {
+                       nome: $('#nome_produto').val(),
+                       descricao: $('#desc_produto').val(),
+                       valor: $('#valor_produto').val()
+                    }
+
+                    $.ajax({
+                         url: `http://localhost:8080/madstore/produtos/${produtoId}`,
+                         method: "PUT",
+                         data: JSON.stringify(produto),
+                         contentType: "application/json",
+                         success: function(response) {
+                             carregarCatalogo();
+                             $('#message-box').text('Produto atualizado com sucesso!').fadeIn().delay(3000).fadeOut();
+                                setTimeout(function() {
+                                $('#produto_modal').modal('hide');
+                             }, 2000);
+                         }
+                    })
 
                 }else{
 
@@ -109,7 +152,7 @@ $(document).ready(function(){
                         descricao: $('#desc_produto').val(),
                         valor: $('#valor_produto').val()
                     }
-                    console.log(produto);
+
                     $.ajax({
                         url: "http://localhost:8080/madstore/produtos",
                         method: "POST",
@@ -138,6 +181,7 @@ $(document).ready(function(){
                     })
 
                 }
+
              } else {
                      $('#message-box').text('Por favor, corrija os erros do formulario.').fadeIn().delay(3000).fadeOut();
                      $('#message-box').addClass('error');
@@ -209,8 +253,6 @@ $(document).ready(function(){
 
     });
 
-
-
      //Atalho crtl + shift + l para tela de login aparecer
      $(document).on('keydown',function(event){
         if(event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'l'){
@@ -220,7 +262,6 @@ $(document).ready(function(){
         }
 
     });
-
 
     //validar dados de entrada de login
     $.validator.addMethod("senhaSegura",function(value,element){
@@ -315,5 +356,6 @@ $(document).ready(function(){
 
     });
 
+    carregarCatalogo();
 
 });

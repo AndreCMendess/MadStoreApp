@@ -79,4 +79,23 @@ section{
  font-weight: bold;
 }
 
+#confirm_delete_modal .modal-content .modal-body {
+   background-color: #FFF9EA;
+
+}
+
+.modal-title {
+  color: #401E01;
+}
+
+#btn_confirm_delete{
+    background-color: #A67A44;
+    border: 1px solid #D0B08C;
+    color: white;
+}
+
+#btn_confirm_delete:hover {
+    background-color: #D0B08C;
+    border: 1px solid #A67A44;
+}
 
