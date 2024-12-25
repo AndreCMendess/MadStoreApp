@@ -135,3 +135,14 @@
     gap: 10px;
 }
 
+#btn_update{
+    background-color: #A67A44;
+    border: 1px solid #D0B08C;
+    color: white;
+}
+
+#btn_update:hover {
+    background-color: #D0B08C;
+    border: 1px solid #A67A44;
+}
+

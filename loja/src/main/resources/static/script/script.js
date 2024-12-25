@@ -45,17 +45,12 @@ $(document).ready(function(){
 
             const produtoId =  $(this).closest('.item').data("id");
             console.log("Produto id para editar", produtoId);
-            abrirModal(produtoId);
+            abrirModalAtualizar(produtoId);
          });
 
-         $(".btn-criar").on('click',function(){
-            myModal.show();
-             if ($('#form_produto').valid()) {
-                                alert('Formulário válido. Produto será atualizado!');
-                                // Aqui você pode fazer o AJAX para salvar o produto
-                         } else {
-                                alert('Formulário inválido. Corrija os erros antes de salvar.');
-                         }
+         $(".btn-create").on('click',function(){
+              abrirModalCadastrar();
+
          });
 
         }else{
@@ -66,9 +61,18 @@ $(document).ready(function(){
     });
 
      const myModal = new bootstrap.Modal(document.getElementById('produto_modal'));
+     let modalTipo= "";
 
-     function abrirModal(produtoId){
+     function abrirModalCadastrar(){
+            modalTipo= "cadastrar"
+            $('#produtoModalLabel').text("Cadastrar novo Produto");
+            myModal.show();
 
+     }
+
+     function abrirModalAtualizar(produtoId){
+            modalTipo= "atualizar"
+            $('#produtoModalLabel').text("Atualizar Produto");
             $.get(`http://localhost:8080/madstore/produtos/${produtoId}`,function(data , status) {
                 if(status === "success"){
                     $('#nome_produto').val(data.nome);
@@ -89,13 +93,23 @@ $(document).ready(function(){
             e.preventDefault();
 
              if ($('#form_produto').valid()) {
-                    alert('Formulário válido. Produto será atualizado!');
-                    // Aqui você pode fazer o AJAX para salvar o produto
+                if(modalTipo==='atualizar'){
+                     alert('Formulário válido. Produto será atualizado!');
+                }else{
+                      alert('Formulário válido. Produto será cadastrado!');
+                }
              } else {
                     alert('Formulário inválido. Corrija os erros antes de salvar.');
              }
 
         })
+
+        $('#produto_modal').on('hidden.bs.modal', function() {
+            modalTipo = '';
+            $('#form_produto').validate().resetForm();
+            $('#form_produto').find('.is-invalid').removeClass('is-invalid');
+            $('#form_produto').find('.is-valid').removeClass('is-valid');
+        });
 
 
 
