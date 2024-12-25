@@ -1,4 +1,5 @@
 $(document).ready(function(){
+    carregarCatalogo();
 
     // Alterna o menu móvel e o ícone de botão
     $('#mobile_btn').on('click',function(){
@@ -6,69 +7,71 @@ $(document).ready(function(){
         $('#mobile_btn').find('i').toggleClass('fa-x');
     });
 
-    // Metodo para obter os produtos armazenados no banco de dados
-    $.ajax({
-        url: "http://localhost:8080/madstore/produtos",
-        method: "GET",
-        success(data) {
-            $('#catalago').empty();
+    function carregarCatalogo(){
+          // Metodo para obter os produtos armazenados no banco de dados
+            $.ajax({
+                url: "http://localhost:8080/madstore/produtos",
+                method: "GET",
+                success(data) {
+                    $('#catalago').empty();
 
-            data.forEach(function(produto) {
-                $('#catalago').append(`
-                    <div class="item" data-id="${produto.id}">
-                       <div class="btn-container">
-                           <i class="btn-edit fas fa-edit"></i>
-                           <i class="btn-delete fas fa-trash-alt"></i>
-                       </div>
-                       <div class="item-heart">
-                           <i class="fa-solid fa-heart"></i>
-                       </div>
-                       <img src="${produto.image || './assets/default.png'}" alt="imagem do produto">
+                    data.forEach(function(produto) {
+                        $('#catalago').append(`
+                            <div class="item" data-id="${produto.id}">
+                               <div class="btn-container">
+                                   <i class="btn-edit fas fa-edit"></i>
+                                   <i class="btn-delete fas fa-trash-alt"></i>
+                               </div>
+                               <div class="item-heart">
+                                   <i class="fa-solid fa-heart"></i>
+                               </div>
+                               <img src="${produto.image || './assets/default.png'}" alt="imagem do produto">
 
-                       <h3 class="item-title">${produto.nome}</h3>
+                               <h3 class="item-title">${produto.nome}</h3>
 
-                       <span class="item-description">${produto.descricao}</span>
+                               <span class="item-description">${produto.descricao}</span>
 
-                       <div class="item-price">
-                            <h4>R$${produto.valor.toFixed(2)}</h4>
-                            <button class="btn-default">
-                                   <i class="fa-solid fa-basket-shopping"></i>
-                            </button>
-                       </div>
-                    </div>
-                `);
+                               <div class="item-price">
+                                    <h4>R$${produto.valor.toFixed(2)}</h4>
+                                    <button class="btn-default">
+                                           <i class="fa-solid fa-basket-shopping"></i>
+                                    </button>
+                               </div>
+                            </div>
+                        `);
+                    });
+
+                    $('.btn-edit, .btn-create, .btn-delete').css("display","none");
+
+                },error: function(xhr, status, error){
+                   console.error("Erro ao carregar os produtos:", status, error);
+
+                   $('#catalago').html("<p>Ocorreu um erro ao carregar os produtos. Tente novamente mais tarde.</p>");
+                }
             });
-        },error: function(xhr, status, error){
-            console.error("Erro ao carregar os produtos:", status, error);
+    }
 
-           $('#catalago').html("<p>Ocorreu um erro ao carregar os produtos. Tente novamente mais tarde.</p>");
-        }
-    });
 
-    $('.btn-edit, .btn-create, .btn-delete').css("display","none");
 
 
     $(".btn-edit").on('click',function(event){
-
-            const produtoId =  $(this).closest('.item').data("id");
-            console.log("Produto id para editar", produtoId);
-            abrirModalAtualizar(produtoId);
+       const produtoId =  $(this).closest('.item').data("id");
+       console.log("Produto id para editar", produtoId);
+       abrirModalAtualizar(produtoId);
     });
 
-         $(".btn-create").on('click',function(){
-              abrirModalCadastrar();
+    $(".btn-create").on('click',function(){
+       abrirModalCadastrar();
+    });
 
-         });
+    const myModal = new bootstrap.Modal(document.getElementById('produto_modal'));
+    let modalTipo= "";
 
-     const myModal = new bootstrap.Modal(document.getElementById('produto_modal'));
-     let modalTipo= "";
-
-     function abrirModalCadastrar(){
-            modalTipo= "cadastrar"
-            $('#produtoModalLabel').text("Cadastrar novo Produto");
-            myModal.show();
-
-     }
+    function abrirModalCadastrar(){
+        modalTipo= "cadastrar"
+        $('#produtoModalLabel').text("Cadastrar novo Produto");
+        myModal.show();
+    }
 
      function abrirModalAtualizar(produtoId){
             modalTipo= "atualizar"
@@ -87,13 +90,13 @@ $(document).ready(function(){
             }).fail(function (){
                 console.error("Erro ao buscar dados do produto.")
             });
-        }
+     }
 
         $('#btn_update').on('click',function(e){
             e.preventDefault();
 
              if ($('#form_produto').valid()) {
-                if(modalTipo==='atualizar'){
+                if(modalTipo === 'atualizar'){
                     $('#message-box').text('Produto atualizado com sucesso!').fadeIn().delay(3000).fadeOut();
                        setTimeout(function() {
                            $('#produto_modal').modal('hide');
@@ -101,19 +104,48 @@ $(document).ready(function(){
 
                 }else{
 
+                    let produto = {
+                        nome: $('#nome_produto').val(),
+                        descricao: $('#desc_produto').val(),
+                        valor: $('#valor_produto').val()
+                    }
+                    console.log(produto);
                     $.ajax({
+                        url: "http://localhost:8080/madstore/produtos",
+                        method: "POST",
+                        data: JSON.stringify(produto),
+                        contentType: "application/json",
+                        success: function(response) {
+                            carregarCatalogo();
+                            $('#message-box').text('Produto cadastrado com sucesso!').fadeIn().delay(3000).fadeOut();
+                              setTimeout(function() {
+                              $('#produto_modal').modal('hide');
+                              $('#form_produto')[0].reset();
+                            }, 2000);
+
+                        },error: function(xhr,status,error) {
+                            $('#message-box').text('Falha ao cadastrar novo produto!').fadeIn().delay(3000).fadeOut();
+                            $('#message-box').addClass('error');
+                            console.log('Erro na requisição: ', error);
+                            console.log('Status: ', status);
+                            console.log('Resposta do servidor: ', xhr.responseText);
+
+                            $('#message-box').fadeOut(3000, function() {
+                                $(this).removeClass('error');
+                            });
+                        }
 
                     })
-                    $('#message-box').text('Produto cadastrado com sucesso!').fadeIn().delay(3000).fadeOut();
-                       setTimeout(function() {
-                           $('#produto_modal').modal('hide');
-                    }, 2000);
+
                 }
              } else {
-                    alert('Formulário inválido. Corrija os erros antes de salvar.');
+                     $('#message-box').text('Por favor, corrija os erros do formulario.').fadeIn().delay(3000).fadeOut();
+                     $('#message-box').addClass('error');
+                     $('#message-box').fadeOut(3000, function() {
+                          $(this).removeClass('error');
+                     });
              }
-
-        })
+        });
 
         $('#produto_modal').on('hidden.bs.modal', function() {
             modalTipo = '';
@@ -121,11 +153,6 @@ $(document).ready(function(){
             $('#form_produto').find('.is-invalid').removeClass('is-invalid');
             $('#form_produto').find('.is-valid').removeClass('is-valid');
         });
-
-
-
-
-
 
     const sections = $('section');
     const navItems = $('.nav-item');

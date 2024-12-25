@@ -28,7 +28,7 @@ public class ProdutoService {
         produto.setNome(produtoDTO.getNome());
         produto.setDescricao(produtoDTO.getDescricao());
         produto.setTamanho(produtoDTO.getTamanho());
-        produto.setValor(produto.getValor());
+        produto.setValor(produtoDTO.getValor());
 
         Produto novoProduto = produtoRepository.save(produto);
 
