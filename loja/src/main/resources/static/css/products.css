@@ -59,14 +59,60 @@
     gap: 20px;
 }
 
-.btn-edit{
+.btn-edit , .btn-create, .btn-delete{
     display: none;
     cursor:pointer;
     border: "1px solid #ccc";
 }
 
-#edit_container{
-    display:none;
+.modal {
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+
+.modal h3 {
+  color: white;
+}
+
+.modal .form-label {
+  color: #A67A44;
+}
+
+.modal-content {
+  background-color: #FFF9EA;
+  padding: 20px;
+  border-radius: 5px;
+  width: 80%;
+  max-width: 600px;
+  position: relative;
+  margin: 10% auto;
+
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 30px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#produto_modal .modal-content .modal-body {
+   background-color: #FFF9EA;
+
+}
+
+#produtoModalLabel{
+  color: #401E01;
 }
 
 @media screen and (max-width: 1170px){
@@ -82,5 +128,10 @@
     .section-subtitle{
         text-align: center;
     }
+}
+
+.btn-container{
+    display: flex;
+    gap: 10px;
 }
 

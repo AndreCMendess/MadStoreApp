@@ -19,6 +19,9 @@ public class ProdutoDTO {
                 this.valor = produto.getValor();
         }
 
+        public ProdutoDTO() {
+        }
+
         public Long getId() {
                 return id;
         }
