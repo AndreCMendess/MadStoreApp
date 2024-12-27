@@ -1,9 +1,7 @@
 package com.madstore.loja.DTO;
 
 import com.madstore.loja.model.Produto;
-import lombok.Data;
 
-@Data
 public class ProdutoDTO {
         private Long id;
         private String nome;
