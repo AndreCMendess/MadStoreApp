@@ -3,6 +3,69 @@ $(document).ready(function(){
     const myModal = new bootstrap.Modal(document.getElementById('produto_modal'));
     let modalTipo= "";
 
+       function getAuthToken() {
+                    return localStorage.getItem('authToken');
+       }
+
+       $.ajaxSetup({
+                    beforeSend: function(xhr) {
+                        let token = getAuthToken();
+                        if (token) {
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                        }
+                    }
+       });
+
+     //validar login
+        $('#btn_login').on('click',function(event){
+            event.preventDefault();
+
+            //Se o login for valido
+            if($('#login_form').valid()){
+
+                let email = $('#txt_email').val();
+                let senha = $('#txt_password').val();
+                console.log('Dados enviados:', { email: email, senha: senha });
+
+                $.ajax({
+
+                    url: 'http://localhost:8080/madstore/autenticar/login',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        email: email,
+                        senha: senha
+
+                    }),
+                    success: function(response){
+                          console.log('login bem sucedido', response);
+                            $('#message-login').text('Login realizado com sucesso!').fadeIn().delay(3000).fadeOut();
+                                                                          setTimeout(function() {
+                                                                              $('#login').css("display", "none");
+                                                                    }, 2000);
+                          localStorage.setItem('authToken', response.token);
+                          console.log('Login bem-sucedido. Token armazenado:', response.token);
+                          verificarAutenticacao();
+
+                    },
+                    error: function(xhr, status, error) {
+
+                        console.error('Erro no login', error);
+                        console.error('Detalhes do erro:', xhr.responseText);
+                        $('#message-login').text('Por favor digite o login e senha corretos!').fadeIn().delay(3000).fadeOut();
+                                                                        setTimeout(function() {
+                                                                  }, 2000);
+                    }
+
+                });
+            }else{
+              $('#message-login').text('Por favor digite o login e senha corretos').fadeIn().delay(3000).fadeOut();
+                                                             setTimeout(function() {
+
+                                                       }, 2000);
+            }
+
+        });
 
     // Alterna o menu móvel e o ícone de botão
     $('#mobile_btn').on('click',function(){
@@ -44,7 +107,7 @@ $(document).ready(function(){
                         `);
                     });
 
-                    $('.btn-edit, .btn-create, .btn-delete').css("display","none");
+                   verificarAutenticacao();
 
                 },error: function(xhr, status, error){
                    console.error("Erro ao carregar os produtos:", status, error);
@@ -172,7 +235,6 @@ $(document).ready(function(){
                             console.log('Erro na requisição: ', error);
                             console.log('Status: ', status);
                             console.log('Resposta do servidor: ', xhr.responseText);
-
                             $('#message-box').fadeOut(3000, function() {
                                 $(this).removeClass('error');
                             });
@@ -263,99 +325,104 @@ $(document).ready(function(){
 
     });
 
-    //validar dados de entrada de login
-    $.validator.addMethod("senhaSegura",function(value,element){
-        return this.optional(element) || /^(?=.*[A-Za-z])(?=.*\d).+$/.test(value);
-    }, " A senha deve conter pelomenos uma letra e um numero");
+    function validarLogin(){
+          //validar dados de entrada de login
+            $.validator.addMethod("senhaSegura",function(value,element){
+                return this.optional(element) || /^(?=.*[A-Za-z])(?=.*\d).+$/.test(value);
+            }, " A senha deve conter pelomenos uma letra e um numero");
 
-    $('#login_form').validate({
-        rules:{
-            email:{
-                required:true,
-                email:true
-            },
-            senha:{
-                required:true,
-                senhaSegura:true,
-                minlength:6
+            $('#login_form').validate({
+                rules:{
+                    email:{
+                        required:true,
+                        email:true
+                    },
+                    senha:{
+                        required:true,
+                        senhaSegura:true,
+                        minlength:6
 
-            }
-        },
-        messages:{
-            email:{
-                required:"O email é obrigatorio para autenticação",
-                email:"O email deve ser valido"
-            },
-            senha:{
-                required:"Por favor ensira sua senha",
-                minlength:"A senha deve conter pelo menos 6 caracteres"
-            }
-        },errorPlacement: function(error,element){
-            error.appendTo(element.parent().find(".error"));
+                    }
+                },
+                messages:{
+                    email:{
+                        required:"O email é obrigatorio para autenticação",
+                        email:"O email deve ser valido"
+                    },
+                    senha:{
+                        required:"Por favor ensira sua senha",
+                        minlength:"A senha deve conter pelo menos 6 caracteres"
+                    }
+                },errorPlacement: function(error,element){
+                    error.appendTo(element.parent().find(".error"));
+                }
+            });
+
+    }
+
+    function validarProduto() {
+          $.validator.addMethod("valorMonetario", function(value, element) {
+                return this.optional(element) || /^(\d+(\.\d{1,2})?)$/.test(value);  // Aceita valores com até duas casas decimais
+            }, "Por favor, insira um valor monetário válido");
+
+            $('#form_produto').validate({
+                rules:{
+                    nome:{
+                        required:true
+                    },
+                    desc:{
+                        required:true
+                    },
+                    valor:{
+                        required:true,
+                        number:true,
+                        min: 0.01,
+                        valorMonetario:true
+
+
+                    }
+                },
+                messages:{
+                    nome:{
+                         required:"O nome do produto é obrigatorio"
+                    },
+                    desc:{
+                        required: "A descrição do produto é obrigatoria"
+                    },
+                    valor:{
+                        required: "O valor do produto é obrigatorio",
+                        number: "Precisa ser um numero valido",
+                        min:"O valor precisa ser maior que 0",
+                        valorMonetario: "Por favor , Insira um valor válido exemplo: 20,00"
+                    }
+
+                },
+                errorPlacement: function(error,element){
+                    error.appendTo(element.parent().find(".error"))
+                }
+            });
+    }
+
+    function verificarAutenticacao() {
+        let token = getAuthToken();
+        if (token && token !== "null" && token !== "") {
+            $('.btn-edit, .btn-create, .btn-delete').css("display", "flex");
+            console.log("usuario autenticado: token on")
+        } else {
+            $('.btn-edit, .btn-create, .btn-delete').css("display", "none");
         }
-    });
-
-    $.validator.addMethod("valorMonetario", function(value, element) {
-        return this.optional(element) || /^(\d+(\.\d{1,2})?)$/.test(value);  // Aceita valores com até duas casas decimais
-    }, "Por favor, insira um valor monetário válido");
-
-    $('#form_produto').validate({
-        rules:{
-            nome:{
-                required:true
-            },
-            desc:{
-                required:true
-            },
-            valor:{
-                required:true,
-                number:true,
-                min: 0.01,
-                valorMonetario:true
+    }
 
 
-            }
-        },
-        messages:{
-            nome:{
-                 required:"O nome do produto é obrigatorio"
-            },
-            desc:{
-                required: "A descrição do produto é obrigatoria"
-            },
-            valor:{
-                required: "O valor do produto é obrigatorio",
-                number: "Precisa ser um numero valido",
-                min:"O valor precisa ser maior que 0",
-                valorMonetario: "Por favor , Insira um valor válido exemplo: 20,00"
-            }
 
-        },
-        errorPlacement: function(error,element){
-            error.appendTo(element.parent().find(".error"))
-        }
-    });
 
-    //validar login
-    $('#btn_login').on('click',function(event){
-        event.preventDefault();
 
-        //Se o login for valido
-        if($('#login_form').valid()){
 
-            $('#login').css("display", "none");
-            alert("login realizado com sucesso!");
-            //O botoes serao visiveis
-            $('.btn-edit').css("display","flex");
-            $('.btn-create').css("display","flex");
-            $('.btn-delete').css("display","flex");
 
-        }else{
-         alert("Por favor, digite o email e senha corretas.");
-        }
 
-    });
 
     carregarCatalogo();
+    validarLogin();
+    validarProduto();
 
 });
