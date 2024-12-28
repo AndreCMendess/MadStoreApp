@@ -38,9 +38,9 @@ public class SecurityConfigurations {
                         // Liberar o POST de login para autenticar o usuário e gerar o token
                         .requestMatchers(HttpMethod.POST, "/madstore/autenticar/login").permitAll()
                         // As rotas POST, PUT e DELETE de produtos exigem autenticação via token JWT
-                        .requestMatchers(HttpMethod.POST, "/madstore/produtos").hasRole("0")
-                        .requestMatchers(HttpMethod.PUT, "/madstore/produtos/**").hasRole("0")
-                        .requestMatchers(HttpMethod.DELETE, "/madstore/produtos/**").hasRole("0")
+                        .requestMatchers(HttpMethod.POST, "/madstore/produtos").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/madstore/produtos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/madstore/produtos/**").hasRole("ADMIN")
                         // Permitir todas as outras requisições
                         .anyRequest().permitAll()
                 )
